@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.orig
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.venv/
+.env
+.env.*
+!.env.example
+models/
+data/
+outputs/
+wandb/
+*.log
+
+# Local release audit notes
+/OPD_OPEN_SOURCE_CHECKLIST.md

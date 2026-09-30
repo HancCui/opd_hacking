@@ -1,0 +1,36 @@
+diff --git a/python/sglang/srt/environ.py b/python/sglang/srt/environ.py
+--- a/python/sglang/srt/environ.py
++++ b/python/sglang/srt/environ.py
+@@ -330,6 +330,7 @@
+ 
+     USE_TRITON_W8A8_FP8_KERNEL = EnvBool(False)
+     SGLANG_RETURN_ORIGINAL_LOGPROB = EnvBool(False)
++    SGLANG_TEMP_SCALED_LOGPROBS = EnvBool(False)
+     SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN = EnvBool(False)
+     SGLANG_MOE_PADDING = EnvBool(False)
+     SGLANG_CUTLASS_MOE = EnvBool(False)
+diff --git a/python/sglang/srt/layers/logits_processor.py b/python/sglang/srt/layers/logits_processor.py
+--- a/python/sglang/srt/layers/logits_processor.py
++++ b/python/sglang/srt/layers/logits_processor.py
+@@ -173,6 +173,12 @@
+                 extend_token_ids_logprob
+             ) = extend_logprob_pruned_lens_cpu = False
+ 
++        # Enable temperature-scaled logprobs for prefill when env var is set
++        temp_scaled_logprobs = envs.SGLANG_TEMP_SCALED_LOGPROBS.get()
++        temperature = None
++        if temp_scaled_logprobs and forward_batch.sampling_info is not None:
++            temperature = forward_batch.sampling_info.temperatures.view(-1, 1)
++
+         return cls(
+             forward_mode=forward_batch.forward_mode,
+             capture_hidden_mode=forward_batch.capture_hidden_mode,
+@@ -187,6 +193,8 @@
+             top_logprobs_nums=forward_batch.top_logprobs_nums,
+             token_ids_logprobs=forward_batch.token_ids_logprobs,
+             extend_input_logprob_token_ids_gpu=forward_batch.extend_input_logprob_token_ids_gpu,
++            temp_scaled_logprobs=temp_scaled_logprobs,
++            temperature=temperature,
+             padded_static_len=forward_batch.padded_static_len,
+             is_prefill_only=forward_batch.is_prefill_only,
+             global_num_tokens_gpu=forward_batch.global_num_tokens_gpu,

@@ -1,0 +1,11 @@
+diff --git a/scripts/models/qwen2.5-1.5B.sh b/scripts/models/qwen2.5-1.5B.sh
+--- a/scripts/models/qwen2.5-1.5B.sh
++++ b/scripts/models/qwen2.5-1.5B.sh
+@@ -13,4 +13,5 @@
+    --group-query-attention
+    --num-query-groups 2
+    --vocab-size 151936
+-)
+\ No newline at end of file
++   --untie-embeddings-and-output-weights
++)

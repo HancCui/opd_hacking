@@ -1,0 +1,12 @@
+diff --git a/train.py b/train.py
+--- a/train.py
++++ b/train.py
+@@ -89,7 +89,7 @@
+         if args.offload_rollout:
+             ray.get(rollout_manager.onload_kv.remote())
+ 
+-        if should_run_periodic_action(rollout_id, args.eval_interval, num_rollout_per_epoch):
++        if should_run_periodic_action(rollout_id, args.eval_interval, num_rollout_per_epoch, args.num_rollout):
+             ray.get(rollout_manager.eval.remote(rollout_id))
+ 
+     ray.get(rollout_manager.dispose.remote())

@@ -1,0 +1,26 @@
+accelerate
+blobfile
+datasets
+httpx[http2]
+mcp[cli]
+memray
+omegaconf
+pillow
+pylatexenc
+pyyaml
+qwen_vl_utils
+ray[default]
+ring_flash_attn
+sglang-router>=0.2.3
+tensorboard
+transformers
+wandb
+
+# Backend dependencies from the pinned upstream setup.
+flash-attn==2.7.4.post1
+transformer_engine[pytorch]==2.10.0
+flash-linear-attention==0.4.0
+megatron-bridge @ git+https://github.com/fzyzcjy/Megatron-Bridge.git@dev_rl
+nvidia-modelopt[torch]>=0.37.0
+nvidia-cudnn-cu12==9.16.0.29
+numpy<2

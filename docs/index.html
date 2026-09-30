@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbfaf7">
+  <title>Gains and Collapse in On-Policy Distillation</title>
+  <meta name="description" content="A visual story of what on-policy distillation learns, why it can collapse, and how to break the cycle. Research from Zhejiang University and Westlake University.">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Gains and Collapse in On-Policy Distillation">
+  <meta property="og:description" content="The student learns the teacher’s preferences—and still collapses. An illustrated research story.">
+  <meta property="og:image" content="https://hanccui.github.io/opd_hacking/assets/figures/overview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="style.css">
+  <script src="assets/data/preference.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#story">Skip to the story</a>
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="OPD research, back to top"><span class="brand-mark" aria-hidden="true">o<span>p</span>d.</span><span class="brand-caption">a research story</span></a>
+    <nav aria-label="Resources"><a href="assets/paper.pdf">Paper <span aria-hidden="true">↗</span></a><a href="https://github.com/HancCui/opd_hacking">Code <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="top">
+    <article>
+      <header class="article-header reading">
+        <p class="eyebrow">On-policy distillation · A reinforcement learning perspective</p>
+        <h1>Gains and Collapse in<br class="desktop-break"> On-Policy Distillation<span class="subtitle">A Reinforcement Learning Perspective</span></h1>
+        <p class="authors">Han Cui<sup>1,2,*</sup>, Jianhao Yan<sup>2,*</sup>, Yun Luo<sup>2,*</sup>,<br class="desktop-break"> Hongbo Zhang<sup>1,2</sup>, Zhizhang Fu<sup>2</sup>, Yue Zhang<sup>2,†</sup></p>
+        <p class="affiliations"><sup>1</sup> Zhejiang University &nbsp; <sup>2</sup> Westlake University<br><span>* Equal contribution &nbsp; † Corresponding author</span></p>
+        <div class="resource-links"><a class="paper-link" href="assets/paper.pdf">Read the paper <span aria-hidden="true">↗</span></a><a href="https://github.com/HancCui/opd_hacking">Explore the code <span aria-hidden="true">↗</span></a></div>
+        <div class="opening"><p>A student can learn its teacher’s preferences<br class="desktop-break"> <em>and still collapse.</em></p><span>What does on-policy distillation actually reinforce?</span></div>
+      </header>
+
+      <figure class="hero-figure wide">
+        <a href="assets/figures/overview.png" class="zoomable" aria-label="Enlarge the overview illustration"><img src="assets/figures/overview.png" width="2048" height="528" alt="Two illustrated paths: accurate teacher preferences guide a student to a correct answer; biased preferences lead the student into a repetitive loop." fetchpriority="high"></a>
+        <figcaption>One training process. Two very different outcomes.</figcaption>
+      </figure>
+
+      <div class="reading intro" id="story">
+        <p>In on-policy distillation (OPD), the student writes the answers and the teacher scores them. Our experiments reveal how this feedback can make correct reasoning easier to sample—or amplify repetition the teacher rarely produces itself.</p>
+        <nav class="contents" aria-label="In this story"><span>In this story</span><a href="#gains">01 &nbsp; The gains</a><a href="#collapse">02 &nbsp; The collapse</a><a href="#preference">03 &nbsp; The blind spot</a><a href="#mitigation">04 &nbsp; Breaking the cycle</a></nav>
+      </div>
+
+      <section id="gains" class="story-section">
+        <div class="reading"><p class="section-number">01 / The gains</p><h2>Better at answering.<br>But solving anything new?</h2><p>With one attempt, the distilled student is much more accurate. Give the initial student more attempts, and it catches up.</p></div>
+        <figure class="wide plot-figure"><a href="assets/figures/pass-at-k.png" class="zoomable" aria-label="Enlarge pass at k results"><img src="assets/figures/pass-at-k.png" alt="Pass at k on AMC23 and AIME24–26: OPD gains are largest at small sampling budgets and shrink as the initial student gets more attempts." loading="lazy"></a><figcaption><strong>More attempts change the picture.</strong> Pass@k measures whether at least one of k sampled answers is correct. AIME uses up to 256 samples; AMC23 uses up to 1,024.</figcaption></figure>
+        <div class="reading">
+          <div class="coverage-story"><div class="coverage-number">0<span>validated<br>OPD-only problems</span></div><div><h3>We checked the apparent “new” solutions.</h3><p>Additional sampling and manual review resolved every candidate in the targeted AIME audit: either the initial student also found a valid solution, or the OPD solution was invalid.</p></div></div>
+          <details><summary>Look closer: coverage &amp; per-problem success</summary><div class="detail-body"><p>The audited initial student solved 73 problems; the JustRL- and DeepScaleR-distilled students covered 65 and 63. For candidate OPD-only problems, we extended the initial student’s pool from 256 to 1,024 responses.</p><a class="zoomable" href="assets/figures/coverage.png"><img src="assets/figures/coverage.png" alt="Audited problem coverage: no validated problem is solved only after OPD." loading="lazy"></a><a class="zoomable" href="assets/figures/sampling-efficiency.png"><img src="assets/figures/sampling-efficiency.png" alt="Per-problem success rates largely lie above the equal-performance diagonal after OPD." loading="lazy"></a><p>Success rates increased on 90.6% of already-solvable problems with JustRL and 84.4% with DeepScaleR.</p></div></details>
+          <aside class="insight"><span>The insight</span><p>OPD makes existing correct answers<br class="desktop-break"> <strong>easier to find.</strong></p><small>In these experiments, we observe improved sampling efficiency, without an expansion of the audited solvable set.</small></aside>
+        </div>
+      </section>
+
+      <section id="collapse" class="story-section">
+        <div class="reading"><p class="section-number">02 / The collapse</p><h2>The loss looks fine.<br>The answers don’t.</h2><p>Now consider Qwen3-4B teaching Qwen3-1.7B-Base. Optimization converges smoothly, but the student’s responses become overlong and repetitive.</p></div>
+        <div class="wide endpoint-visual">
+          <div class="endpoint-heading"><h3>What the teacher writes vs. what the student becomes</h3><span>AIME24–26 · Final generations</span></div>
+          <div class="endpoint-labels"><span>Behavior</span><span>Teacher</span><span>Student after OPD</span></div>
+          <div class="endpoint-row"><span>Hits the length limit</span><div><strong>2.1<small>%</small></strong><div class="meter"><i style="--value:2.1%;" class="healthy"></i></div></div><div><strong class="bad-text">99.4<small>%</small></strong><div class="meter"><i style="--value:99.4%;" class="unhealthy"></i></div></div></div>
+          <div class="endpoint-row"><span>Severe repetition</span><div><strong>0.0<small>%</small></strong><div class="meter"><i style="--value:0%;" class="healthy"></i></div></div><div><strong class="bad-text">38.0<small>%</small></strong><div class="meter"><i style="--value:38%;" class="unhealthy"></i></div></div></div>
+          <p class="small-note">The student’s accuracy still rises from 0.2% to 5.4%. Accuracy alone misses the degeneration.</p>
+        </div>
+        <div class="reading"><p>Meanwhile, the student increasingly favors the responses preferred by its teacher. The feedback is being learned—even as generation quality deteriorates.</p><details><summary>See the evidence: convergence &amp; learned preferences</summary><div class="detail-body"><a class="zoomable" href="assets/figures/convergence.png"><img src="assets/figures/convergence.png" alt="Both successful and collapsed runs converge normally; their responses concentrate and remain likely under the initial student." loading="lazy"></a><p>Both runs converge and concentrate on responses already likely under the initial student.</p><a class="zoomable small-plot" href="assets/figures/selection-gap.png"><img src="assets/figures/selection-gap.png" alt="The preference selection gap increases after training, especially in the collapsed Qwen3 setting." loading="lazy"></a><p>The selection gap measures how much training favors the teacher’s top-ranked over bottom-ranked initial-student responses. It grows modestly with JustRL and sharply in the collapsed Qwen3 setting.</p></div></details><aside class="insight danger"><span>The insight</span><p>Learning the teacher’s preferences<br class="desktop-break"> <strong>can reinforce the wrong behavior.</strong></p><small>This is the reward-hacking pattern: fitting the feedback while response quality deteriorates.</small></aside></div>
+      </section>
+
+      <section id="preference" class="story-section">
+        <div class="reading"><p class="section-number">03 / The blind spot</p><h2>The teacher rarely writes this.<br>Why does it reward it?</h2><p>The warning signs exist <strong>before the first OPD update.</strong> Some initial-student answers receive favorable teacher feedback despite being excessively long or repetitive.</p></div>
+        <div class="wide response-pair">
+          <div class="response good-response"><div class="response-label"><span class="status-dot"></span> Teacher’s own response</div><h3>A solution that ends.</h3><blockquote>“Number of <strong>grand prize</strong> outcomes: 1. … Number of <strong>prize</strong> outcomes (≥ 2 matches): 115. …<br><br>P(Grand Prize | Prize) = 1/115.<br>Thus, m + n = 1 + 115 = <mark>116.</mark>”</blockquote><div class="response-meta">Correct · 842 tokens</div></div>
+          <div class="response bad-response"><div class="response-label"><span class="status-dot"></span> Teacher-preferred student response</div><h3>An answer that won’t stop.</h3><blockquote>“<mark>Final Answer: 116</mark> …<br>Answer: 116 …<br><mark>Final Answer: 116</mark> …<br>Answer: 116 …”</blockquote><div class="repeat-count"><strong>365×</strong><span>the same answer line,<br>until the length limit</span></div><div class="response-meta">Correct answer · 8,192 tokens · Truncated</div></div>
+        </div>
+        <div class="reading"><p class="small-note">Real excerpts from the paper’s Qwen3-4B examples. Ellipses indicate omitted text. The student example predates OPD; examples illustrate behavior, not prevalence.</p><details><summary>Another example: repeated reconsideration</summary><div class="detail-body"><blockquote class="example-quote">“17,499,840/661,680 = 26.5. <strong>Wait, this is incorrect.</strong> The calculation is not correct. Instead, we should compute the number of valid sequences. Let’s go back. … But this is not correct. <strong>Wait, for the last word</strong> to be GY, … <strong>Wait, this is not correct.</strong>”</blockquote><p class="small-note">Teacher-preferred initial-student response · Incorrect · 7,311 tokens.</p></div></details><h3 class="subheading">What does the teacher favor?</h3><p>Sort initial-student answers from least to most preferred by the teacher. In the successful setting, preferred answers are more often correct. In the collapsed setting, the highest-ranked answers are disproportionately repetitive.</p></div>
+        <div class="wide preference-explorer" id="preference-explorer" hidden>
+          <div class="explorer-controls"><div class="segmented" role="group" aria-label="Teacher setting"><button type="button" data-setting="justrl" aria-pressed="false">JustRL <span>successful setting</span></button><button type="button" data-setting="base8k" aria-pressed="true">Qwen3-4B <span>collapsed setting</span></button></div><label class="dataset-label">Dataset <select id="dataset"><option value="aime24">AIME24</option><option value="aime25">AIME25</option><option value="aime26">AIME26</option></select></label></div>
+          <p id="chart-context" class="chart-context" aria-live="polite"></p>
+          <div class="chart-grid" id="preference-charts"></div>
+          <div class="decile-key"><span>A1 · Least preferred</span><span aria-hidden="true">Teacher preference →</span><span>A10 · Most preferred</span></div>
+          <p class="small-note">Each group contains 10% of initial-student responses, ranked by mean teacher advantage. Whiskers reproduce the paper’s uncertainty intervals; dashed lines show the teacher’s own mean response length. Axis ranges stay fixed when switching settings.</p>
+          <details><summary>View chart values</summary><div id="chart-values" class="table-scroll"></div></details>
+        </div>
+        <noscript><figure class="wide"><img src="assets/figures/teacher-preference.png" alt="Teacher preference deciles: JustRL favors correct and shorter responses, while Qwen3 favors overlong and repetitive responses."><figcaption>Initial-student responses ranked by teacher advantage.</figcaption></figure></noscript>
+        <div class="reading"><aside class="insight danger"><span>The insight</span><p>A good generator can still be<br class="desktop-break"> <strong>an unreliable evaluator.</strong></p><small>The teacher’s own answers do not reveal how it scores the student’s trajectories.</small></aside></div>
+        <figure class="wide feedback-loop"><div class="loop-heading">How the bias gets amplified <span>Conceptual illustration</span></div><div class="loop-steps"><div><span class="step-no">1</span><strong>Student samples</strong><p>Rare pathological answers<br>are already in the pool.</p></div><span class="step-arrow" aria-hidden="true">→</span><div><span class="step-no">2</span><strong>Teacher favors</strong><p>Some receive high<br>teacher advantage.</p></div><span class="step-arrow" aria-hidden="true">→</span><div><span class="step-no">3</span><strong>OPD amplifies</strong><p>These behaviors become<br>more likely to appear.</p></div></div><div class="loop-return"><span>↶ &nbsp; More of these responses enter the next round</span></div></figure>
+      </section>
+
+      <section id="mitigation" class="story-section">
+        <div class="reading"><p class="section-number">04 / Breaking the cycle</p><h2>Same teacher.<br>A different trajectory.</h2><p>Keep the teacher fixed. Change which student responses are available for reinforcement.</p><div class="intervention-methods"><div><span class="method-index">A</span><h3>Mask truncated responses</h3><p>Set the loss to zero for answers that reach the generation limit.</p><span class="method-result">Recovers from degeneration ↗</span></div><div><span class="method-index">B</span><h3>Start from SFT</h3><p>Initialize with an SFT student that rarely samples these pathological answers.</p><span class="method-result">Avoids this collapse ↗</span></div></div></div>
+        <figure class="wide plot-figure"><a class="zoomable" href="assets/figures/interventions.png" aria-label="Enlarge intervention training curves"><img src="assets/figures/interventions.png" alt="Training trajectories of response length, truncation, and repetition: masking settings recover, while the SFT warmup setting avoids the failure mode." loading="lazy"></a><figcaption><strong>The cycle can be interrupted.</strong> Masking recovers as training progresses; SFT initialization avoids the same failure mode from the start.</figcaption></figure>
+        <div class="reading"><div class="result-callout"><strong>+3.08<span>percentage points</span></strong><p>Average accuracy with masking<br><b>10.16% → 13.24%</b><small>Qwen3-4B teacher · AMC23 &amp; AIME24–26</small></p></div><details><summary>All teacher sizes &amp; benchmark results</summary><div class="detail-body table-scroll"><table><caption>Accuracy (%). Average across four benchmarks.</caption><thead><tr><th scope="col">Setting</th><th scope="col">AMC23</th><th scope="col">AIME24</th><th scope="col">AIME25</th><th scope="col">AIME26</th><th scope="col">Avg.</th></tr></thead><tbody><tr><th scope="row">Base, before OPD</th><td>2.41</td><td>1.67</td><td>0.00</td><td>1.67</td><td>1.44</td></tr><tr><th scope="row">4B → Base</th><td>29.82</td><td>3.33</td><td>3.33</td><td>4.17</td><td>10.16</td></tr><tr class="improved"><th scope="row">+ masking</th><td>34.64</td><td>8.33</td><td>5.83</td><td>4.17</td><td>13.24</td></tr><tr><th scope="row">8B → Base</th><td>28.31</td><td>5.00</td><td>3.33</td><td>5.00</td><td>10.41</td></tr><tr class="improved"><th scope="row">+ masking</th><td>32.83</td><td>5.00</td><td>2.50</td><td>3.33</td><td>10.92</td></tr><tr><th scope="row">30B-A3B → Base</th><td>28.61</td><td>6.67</td><td>2.50</td><td>4.17</td><td>10.49</td></tr><tr class="improved"><th scope="row">+ masking</th><td>33.13</td><td>10.00</td><td>4.17</td><td>5.00</td><td>13.07</td></tr><tr class="improved"><th scope="row">4B → SFT (warmup)</th><td>38.86</td><td>9.17</td><td>10.00</td><td>7.50</td><td>16.38</td></tr></tbody></table><p class="small-note">Masking improves the average across all three teacher sizes, though not every benchmark improves. Warmup starts from a stronger SFT initialization, so its result includes that initialization advantage.</p></div></details><aside class="insight"><span>The insight</span><p>What gets reinforced<br class="desktop-break"> <strong>shapes what comes next.</strong></p><small>Controlling the student’s rollout pool can mitigate the observed failure while keeping the teacher fixed.</small></aside></div>
+      </section>
+
+      <section class="reading closing" id="takeaway"><p class="section-number">The bigger picture</p><h2>Look beyond what<br>the teacher can generate.</h2><p class="closing-lead">Ask how reliably it evaluates<br class="desktop-break"> <em>what the student actually writes.</em></p><p>OPD amplifies student behaviors through the teacher’s implicit feedback. That perspective connects its gains, its collapse, and the interventions that help.</p><details class="scope"><summary>Scope of these findings</summary><div class="detail-body"><p>Our experiments focus on small language models and competition mathematics. Coverage is measured with finite sampling and targeted manual audits. Masking and SFT warmup address the overlong, repetitive behavior studied here; these results do not establish a universal solution to OPD collapse.</p><p>Successful settings use JustRL-1.5B and DeepScaleR-1.5B-Preview teaching DeepSeek-R1-Distill-Qwen-1.5B on DeepMath. The collapsed setting uses Qwen3-4B teaching Qwen3-1.7B-Base on OpenThoughts3. The paper provides full protocols.</p></div></details><div class="resource-links"><a class="paper-link" href="assets/paper.pdf">Read the full paper <span aria-hidden="true">↗</span></a><a href="https://github.com/HancCui/opd_hacking">Explore the code <span aria-hidden="true">↗</span></a></div></section>
+
+      <section class="reading citation" id="citation"><div class="citation-heading"><h2>Citation</h2><button type="button" id="copy-citation" hidden>Copy BibTeX</button></div><pre><code id="bibtex">@misc{cui2026gains,
+  title  = {Gains and Collapse in On-Policy Distillation:
+            A Reinforcement Learning Perspective},
+  author = {Han Cui and Jianhao Yan and Yun Luo and
+            Hongbo Zhang and Zhizhang Fu and Yue Zhang},
+  year   = {2026},
+  url    = {https://github.com/HancCui/opd_hacking}
+}</code></pre><p id="copy-status" class="small-note" role="status"></p></section>
+    </article>
+  </main>
+  <footer class="reading site-footer"><span>Zhejiang University · Westlake University</span><a href="#top">Back to top ↑</a></footer>
+  <dialog id="image-dialog" aria-label="Enlarged figure"><button type="button" id="close-dialog" aria-label="Close enlarged figure">Close ×</button><img id="dialog-image" alt=""><p id="dialog-caption"></p></dialog>
+</body>
+</html>
