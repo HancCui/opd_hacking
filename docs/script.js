@@ -40,7 +40,7 @@ function renderPreferenceCharts() {
     const teacher = metric.key === 'mean_response_tokens'
       ? `<line x1="${left}" x2="${W-right}" y1="${y(rows[0][`${dataset}_teacher`])}" y2="${y(rows[0][`${dataset}_teacher`])}" stroke="#898d80" stroke-dasharray="4 4"><title>Teacher mean: ${formatValue(rows[0][`${dataset}_teacher`], metric)}</title></line>` : '';
     const titleId = `metric-title-${index}`;
-    return `<div class="mini-chart"><h4>${metric.label}${metric.unit === '%' ? ' (%)' : ' (tokens)'}</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="${titleId}"><title id="${titleId}">${metric.label} by teacher preference on ${dataset.toUpperCase()}. Least-preferred group: ${formatValue(rows[0][dataset], metric)}. Most-preferred group: ${formatValue(last, metric)}.</title>${grid}${teacher}${errors}<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.3" stroke-linejoin="round"/>${dots}${tickLabels}<text class="chart-value" x="${x(9)}" y="${Math.max(15, y(last)-13)}" text-anchor="end" style="fill:${color}">${formatValue(last, metric)}</text></svg></div>`;
+    return `<div class="mini-chart"><p class="metric-title">${metric.label}${metric.unit === '%' ? ' (%)' : ' (tokens)'}</p><svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="${titleId}"><title id="${titleId}">${metric.label} by teacher preference on ${dataset.toUpperCase()}. Least-preferred group: ${formatValue(rows[0][dataset], metric)}. Most-preferred group: ${formatValue(last, metric)}.</title>${grid}${teacher}${errors}<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.3" stroke-linejoin="round"/>${dots}${tickLabels}<text class="chart-value" x="${x(9)}" y="${Math.max(15, y(last)-13)}" text-anchor="end" style="fill:${color}">${formatValue(last, metric)}</text></svg></div>`;
   }).join('');
   const rows = preferenceData[currentSetting].correct_rate;
   document.querySelector('#chart-values').innerHTML = `<table><caption>${currentSetting === 'justrl' ? 'JustRL' : 'Qwen3-4B'} · ${dataset.toUpperCase()} · Group means</caption><thead><tr><th scope="col">Group</th>${metrics.map(m=>`<th scope="col">${m.label}</th>`).join('')}</tr></thead><tbody>${rows.map((_, i)=>`<tr><th scope="row">A${i+1}</th>${metrics.map(m=>`<td>${formatValue(preferenceData[currentSetting][m.key][i][dataset], m)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
@@ -111,7 +111,7 @@ document.querySelectorAll('.overview-animation').forEach(figure => {
     source.srcset = url;
     img.src = url;
     button.textContent = playing ? 'Show still image' : 'Play animation';
-    button.setAttribute('aria-label', `${button.textContent}: ${figure.querySelector('h3').textContent}`);
+    button.setAttribute('aria-label', `${button.textContent}: ${figure.querySelector('.figure-title').textContent}`);
   }
   button.hidden = false;
   update();
