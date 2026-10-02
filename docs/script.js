@@ -98,3 +98,23 @@ copyButton.addEventListener('click', async () => {
     status.textContent = 'Citation selected. Press Ctrl+C (or ⌘C) to copy.';
   }
 });
+
+// Offer a still version for motion sensitivity and let readers restart each scene.
+document.querySelectorAll('.overview-animation').forEach(figure => {
+  const img = figure.querySelector('img');
+  const source = figure.querySelector('source');
+  const button = figure.querySelector('.animation-toggle');
+  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let playing = !preference.matches;
+  function update() {
+    const url = playing ? img.dataset.animation : img.dataset.poster;
+    source.srcset = url;
+    img.src = url;
+    button.textContent = playing ? 'Show still image' : 'Play animation';
+    button.setAttribute('aria-label', `${button.textContent}: ${figure.querySelector('h3').textContent}`);
+  }
+  button.hidden = false;
+  update();
+  button.addEventListener('click', () => { playing = !playing; update(); });
+  preference.addEventListener('change', event => { playing = !event.matches; update(); });
+});
