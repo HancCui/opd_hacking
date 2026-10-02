@@ -40,9 +40,6 @@ refer to the research workspace, whose scripts have not been changed.
 | `run-012`, `run-013` | Section 5: Qwen3-30B-A3B Base and masking. |
 | `run-001`, `run-002`, `run-003`, `run-004`, `run-005` | Appendix A.2: five teacher-scoring temperatures, **with the overrides below**. |
 
-The masked configurations combine completed-only masking and EOS mapping;
-they do not isolate masking from token mapping.
-
 ## Appendix A.2 training pilot
 
 These are protocol reconstructions using retained recipes, not a claim that the
@@ -92,9 +89,8 @@ the retained 8k experiments use 1e-6; the actual experiment configurations are p
 - `launchers/run-deepmath-*.sh`: converts the initial model if necessary, starts the
   teacher service and Ray, and submits training.
 - `on_policy_distillation.py`: project OPD reward hook; requests teacher token
-  logprobs, processes scoring results, grades evaluation answers, and implements
-  optional completed-only filtering and terminal-token mapping. The loss itself
-  remains in `slime/`.
+  logprobs, processes scoring results, and grades evaluation answers. The loss
+  itself remains in `slime/`.
 - `runtime.sh`: shared shell helpers for free ports, service health checks, Ray job
   status, worker environment forwarding, and proxy exclusions.
 - `upstream_entry.py`: runs upstream training/conversion entry points while ensuring
@@ -141,8 +137,6 @@ After pruning: all 17 shell files passed `bash -n`; all 13 numbered recipes plus
 the two base launchers passed full dry-run. All five appendix override combinations
 were checked for temperature, rollout count, save/eval intervals, sample count,
 datasets, and response cap. Kept code and training defaults were not changed.
-Earlier export checks covered project-first imports and 23 CPU cases for metrics,
-EOS mapping and completed-only filtering; they were not rerun for this file removal.
 Moving the three launcher files was checked separately: all 17 shell syntax checks
 and 15 full dry-runs passed, with identical training argument vectors before/after.
 Path portability was subsequently validated with 60 full dry-runs (15 entry points,
@@ -239,4 +233,3 @@ fixed system temporary directory. Existing `TMPDIR` does not control these scrip
 paths. The scripts create output directories during actual execution, not during dry-run.
 Keep the resolved `RAY_TEMP_DIR` short enough for Ray's Unix socket path limit when
 placing the repository under a deeply nested directory.
-

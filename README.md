@@ -3,9 +3,8 @@
   A Reinforcement Learning Perspective
 </h1>
 
-<!-- Replace the two href placeholders with the website and paper URLs. -->
 <p align="center">
-  <a href="https://hanccui.github.io/opd_hacking">🌐 Website</a> &nbsp; | &nbsp; <a href="#">📄 Paper</a>
+  <a href="https://hanccui.github.io/opd_hacking">🌐 Website</a> &nbsp; | &nbsp; <span>📄 Paper (arXiv link coming soon)</span>
 </p>
 
 <p align="center">
