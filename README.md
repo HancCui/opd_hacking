@@ -4,7 +4,7 @@
 </h1>
 
 <p align="center">
-  <a href="https://hanccui.github.io/opd_hacking">🌐 Website</a> &nbsp; | &nbsp; <span>📄 Paper (arXiv link coming soon)</span>
+  <a href="https://hanccui.github.io/opd_hacking">🌐 Website</a> &nbsp; | &nbsp; <a href="https://arxiv.org/abs/2610.03185">📄 Paper (arXiv)</a>
 </p>
 
 <p align="center">
@@ -53,8 +53,6 @@ opd_hacking/
 ├── figures/            # README figures
 └── docs/               # Reserved for additional documentation
 ```
-
-<!-- Add the paper link when ready. -->
 
 ## Installation
 
@@ -128,5 +126,13 @@ open-source community for making this research possible.
 ## Citation
 
 ```bibtex
-% Add the arXiv BibTeX citation here.
+@misc{cui2026gainscollapseonpolicydistillationa,
+      title={Gains and Collapse in On-Policy Distillation:A Reinforcement Learning Perspective},
+      author={Han Cui and Jianhao Yan and Yun Luo and Hongbo Zhang and Zhizhang Fu and Yue Zhang},
+      year={2026},
+      eprint={2610.03185},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2610.03185},
+}
 ```
